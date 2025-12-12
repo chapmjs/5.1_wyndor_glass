@@ -54,15 +54,20 @@ plant3_windows_time = st.sidebar.number_input("Windows time in P3", value=2, min
 
 
 # --- Run the Model ---
+# app.py - UPDATED FUNCTION CALL
 if st.button("Solve for Optimal Mix"):
     
-    # Collect all inputs and run the solver function from lp_solver.py
     results = solve_lp_problem(
         doors_profit, windows_profit,
-        plant1_doors_time, plant2_windows_time,
-        plant3_doors_time, plant3_windows_time,
+        
+        # New order must match the new lp_solver.py definition
+        plant1_doors_time, plant1_windows_time, # Plant 1
+        plant2_doors_time, plant2_windows_time, # Plant 2
+        plant3_doors_time, plant3_windows_time, # Plant 3
+        
         plant1_capacity, plant2_capacity, plant3_capacity
     )
+    # ... rest of app.py
 
     st.header("✅ Optimization Results")
     st.markdown("---")
