@@ -1,56 +1,41 @@
 # lp_solver.py
 from pulp import LpProblem, LpVariable, LpMaximize, LpStatus, value
+import numpy as np # Adding numpy for robust float comparisons if needed
 
-def solve_lp_problem(doors_profit, windows_profit,
-                     plant1_doors_time, plant2_windows_time,
-                     plant3_doors_time, plant3_windows_time,
-                     plant1_capacity, plant2_capacity, plant3_capacity):
+def solve_lp_problem(
+    doors_profit, windows_profit,
+    
+    # 6 Production Time Coefficients:
+    plant1_doors_time, plant1_windows_time,  # <--- plant1_windows_time ADDED
+    plant2_doors_time, plant2_windows_time,  # <--- plant2_doors_time ADDED
+    plant3_doors_time, plant3_windows_time,
+    
+    # 3 Capacity Values:
+    plant1_capacity, plant2_capacity, plant3_capacity
+):
     """
     Formulates and solves the Linear Programming product-mix problem using PuLP.
-    
-    Returns: A dictionary containing status, optimal variables, max profit, and constraint details.
+    ...
     """
     
-    # 1. Create the Problem
-    prob = LpProblem("Product Mix Optimization", LpMaximize)
-
-    # 2. Define Decision Variables
-    x1 = LpVariable("Doors", lowBound=0, cat='Continuous')
-    x2 = LpVariable("Windows", lowBound=0, cat='Continuous')
-
-    # 3. Define the Objective Function (Maximize Total Profit)
-    # Z = Profit_Door * x1 + Profit_Window * x2
-    prob += doors_profit * x1 + windows_profit * x2, "Total_Profit"
+    # ... rest of the function remains the same ...
 
     # 4. Define Constraints (Available Production Capacity)
     
-    # Plant 1 Constraint: Time_P1_Door * x1 + Time_P1_Window * x2 <= Capacity_P1
+    # Plant 1 Constraint: (1x1 + 0x2 <= 4 in the initial problem)
     prob += plant1_doors_time * x1 + plant1_windows_time * x2 <= plant1_capacity, "Plant_1_Capacity"
+    #                                ^^^^^^^^^^^^^^^^^^^  <-- Now defined!
 
-    # Plant 2 Constraint: Time_P2_Door * x1 + Time_P2_Window * x2 <= Capacity_P2
+    # Plant 2 Constraint: (0x1 + 2x2 <= 12 in the initial problem)
     prob += plant2_doors_time * x1 + plant2_windows_time * x2 <= plant2_capacity, "Plant_2_Capacity"
-
-    # Plant 3 Constraint: Time_P3_Door * x1 + Time_P3_Window * x2 <= Capacity_P3
+    #         ^^^^^^^^^^^^^^^^^^  <-- Now defined!
+    
+    # Plant 3 Constraint
     prob += plant3_doors_time * x1 + plant3_windows_time * x2 <= plant3_capacity, "Plant_3_Capacity"
 
-    # 5. Solve the Problem
-    prob.solve()
-    
-    # 6. Prepare Results Dictionary
-    results = {
-        "status": LpStatus[prob.status],
-        "doors_units": 0,
-        "windows_units": 0,
-        "max_profit": 0,
-        "constraints": {}
-    }
-
+    # ... and you'll need to update the time_used calculation in the results section too:
     if prob.status == LpStatus.Optimal:
-        results["doors_units"] = value(x1)
-        results["windows_units"] = value(x2)
-        results["max_profit"] = value(prob.objective)
-        
-        # Calculate utilization for the output table
+        # ...
         results["constraints"] = {
             "Plant 1": {
                 "capacity": plant1_capacity,
